@@ -29,10 +29,9 @@ int n_user;									//number of users
 int cardhold[N_MAX_USER+1][N_MAX_CARDHOLD];	//cards that currently the players and server hold
 int cardSum[N_MAX_USER+1];					//sum of the cards of server and players (include you)
 int bet[N_MAX_USER+1];						//current betting 
-int gameEnd = 0; 							//game end flag
-int cardsuit[];							// return cardshape that apply to cardnum
-int roundNo = 0;								//show which round is it
-
+int gameEnd = 0; 							//game end flag . No money or No card 
+int cardsuit[3];							// return cardshape that apply to cardnum. shape and number occupy max 3 places
+int roundNo = 0;							//show which round is it
 
 //card processing functions ---------------
 
@@ -45,7 +44,7 @@ int getCardNum(int cardnum) {
 }
 
 //print the card information (e.g. DiaA)
-void printCard(int cardnum) {
+char *printCard(int cardnum) {
 	char *strCardShape[] = {"¢À", "¡ß", "¢¾", "¢¼"};
 	char *strCardNumber[] = {"A ", "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 ", "9 ", "10", "J ", "Q ", "K "};   //'10' occupy two place so other number spaced
 	
@@ -66,12 +65,36 @@ void printCard(int cardnum) {
 //card array controllers -------------------------------
 
 //mix the card sets and put in the array
+//rand funstion can occur overlap. So select one card and change position with other card
 int mixCardTray(void) {
-
+	int i;
+	int card_loc;				//The location of current card
+	int rand_loc;				//The location of random
+	int card_loc_num;			//The location of current card's number
+	int rand_loc_num;			//The location of random's number
+	
+	for(i=0;i<N_CARDSET*N_CARD;i++)
+		CardTray[i] = i;
+	for(card_loc=0;card_loc<N_CARDSET*N_CARD;card_loc++){
+		rand_loc = rand() % (N_CARDSET*N_CARD);
+		
+		//Before chage
+		card_loc_num = CardTray[card_loc];
+		rand_loc_num = CardTray[rand_loc];
+		
+		//change
+		CardTray[card_loc] = rand_loc_num;
+		CardTray[rand_loc] = card_loc_num;
+	}
 }
 
 //get one card from the tray
 int pullCard(void) {
+	int i;
+	i = CardTray[cardIndex];
+	cardIndex = cardIndex + 1;
+	
+	return i;
 }
 
 
@@ -150,16 +173,37 @@ void offerCards(void) {
 		cardhold[i][0] = pullCard();
 		cardhold[i][1] = pullCard();
 	}
+	/*													//Server is user0
 	//2. give two card for the operator
 	cardhold[n_user][0] = pullCard();
 	cardhold[n_user][1] = pullCard();
-	
+	*/
 	return;
 }
 
 //print initial card status
 void printCardInitialStatus(void) {
+	int i;
+	char card1[3];
+	char card2[3];
 	
+	printf("----------- CARD OFFERING ---------------\n");
+	
+		strcpy( card1, printCard(cardhold[0][0]) );
+		strcpy( card2, printCard(cardhold[0][1]) );
+		
+		printf("	server	:	%s %s\n", card1, card2);
+	for(i=1;i<n_user;i++){
+		strcpy( card1, printCard(cardhold[i][0]) );
+		strcpy( card2, printCard(cardhold[i][1]) );
+		
+		if(i == 1){
+			printf("	you	:	%s %s\n", card1, card2);
+		}
+		else{
+			printf("	player%d :	%s %s\n", i-1, card1, card2);
+		}
+	}	
 }
 
 int getAction(void) {
@@ -239,6 +283,7 @@ int main(int argc, char *argv[]) {
 		*/
 		//result
 		checkResult();
+		gameEnd == 1;
 	} while (gameEnd == 0);
 	
 	checkWinner();
