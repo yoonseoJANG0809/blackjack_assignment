@@ -186,6 +186,9 @@ void printCardInitialStatus(void) {
 	int i;
 	char card1[3];
 	char card2[3];
+	int sumcard1;
+	int sumcard2;
+	int user;
 	
 	printf("----------- CARD OFFERING ---------------\n");
 	
@@ -204,9 +207,46 @@ void printCardInitialStatus(void) {
 			printf("	player%d :	%s %s\n", i-1, card1, card2);
 		}
 	}	
+	
+	if(sumcard1 == 1 && sumcard2 == 1){					  							//2card is ace
+		cardSum[user] = 1+11;														//11+11-->overflow. So 1+11
+	}
+	else if(sumcard1 == 1 || sumcard2 == 1){
+		if((sumcard1 + sumcard2 + 10) >= 17 && (sumcard1 + sumcard2 + 10) <= 21){	//When the sum of the cards is between 17 and 21, ace is 11
+			cardSum[user] = (sumcard1 + sumcard2 + 10);
+		}
+		else if((sumcard1 + sumcard2) > 21){										//when the sum of the cards is over 21, ace is 1
+			cardSum[user] = (sumcard1 + sumcard2);
+		}
+		else{																		//when the sum of the card is less 17, ace is 11
+			cardSum[user] = (sumcard1 + sumcard2 + 10);
+		}
+	}
 }
 
 int getAction(void) {
+	char cardPrint[3];
+	int user;
+	int GoorStay;		//Go or Stay
+	
+	if(user == 0){
+		printf("servers turn  :  (sum=%d)", cardSum[user]);
+	}
+	else if(user == 1){
+		printf("your turn  :  (sum=%d)", cardSum[user]);
+	}
+	else{
+		printf("player%d turn  :  (sum=%d)", user-1, cardSum[user]);
+	}
+	
+	if(user == 1){
+		printf(" ==> Action? (0 - go, others - stay) : ");
+		scanf("%d", &GoorStay);
+		
+		if(GoorStay == 0){
+			
+		}
+	}
 	
 }
 
@@ -225,7 +265,21 @@ void printUserCardStatus(int user, int cardcnt) {
 
 // calculate the card sum and see if : 1. under 21, 2. over 21, 3. blackjack
 int calcStepResult() {
+	int i;
 	
+	printf(" -------------------- ROUND %d result ....\n", roundNo);
+	
+	for(i=1;i<=n_user;i++){
+		if( i == 1){
+			printf("   -> your result : ");
+		}
+		else{
+			printf("   -> %d'th player's result : ", i-1);
+		}
+		printf(" (sum:%d) ", cardSum[i]);
+		
+		
+	}
 }
 
 int checkResult() {
