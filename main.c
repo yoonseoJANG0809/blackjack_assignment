@@ -143,7 +143,7 @@ int betDollar(void) {
 			
 		}
 		else if(getBetting > dollar[1]){
-			printf("  -> you only have $50! bet again\n");
+			printf("  -> you only have $%d! bet again\n", dollar[1]);
 		}
 		else{
 			printf("  -> invalid input for betting\n");
