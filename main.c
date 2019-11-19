@@ -272,7 +272,7 @@ int getAction(void) {
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
 			if( cardSum[user] == 21){
-				printf("::: Black Jack!congratulation, you win!! --> +$%d ($52)", bet[user]*2, dollar[user]);
+				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user]);
 			}
 			else if( cardSum[user] > 21){
 				printf("::: DEAD (sum:%d) --> -$%d ($%d)", cardSum[user], bet[user]*2, dollar[user]);
