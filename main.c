@@ -303,7 +303,23 @@ void printUserCardStatus(int user, int cardcnt) {
 
 // calculate the card sum and see if : 1. under 21, 2. over 21, 3. blackjack
 int calcStepResult() {
+	int i;
+	int j;
+	int sumCard;			//sum of all cards
+	int currCard;			//card to add
+	int keepround = 0;		//keep round: 0, stop reound: 1
 	
+	for(i=0;i<=n_user;i++){
+		for(j=1;j<=usercardCount;j++){
+			currCard = getCardNum( cardhold [i][j] );
+			sumCard = sumCard + currCard;					//add by accumulating the card 
+		}
+		cardSum[i] = sumCard;
+		if( cardSum[i] == 21 ){
+			keepround = 1;
+		}
+	}
+	return keepround;
 }
 
 int checkResult() {
