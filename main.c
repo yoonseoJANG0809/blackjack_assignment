@@ -35,6 +35,7 @@ char cardsuit[3];							// return cardshape that apply to cardnum. shape and num
 int roundNo = 0;							//show which round is it
 int usercardCount[N_MAX_USER+1];
 
+
 //card processing functions ---------------
 
 //calculate the actual card number in the blackjack game
@@ -75,9 +76,10 @@ int mixCardTray(void) {
 	int card_loc_num;			//The location of current card's number
 	int rand_loc_num;			//The location of random's number
 	
-	for(i=0;i<N_CARDSET*N_CARD;i++)
+	for(i=0; i < N_CARDSET*N_CARD; i++)
 		CardTray[i] = i;
-	for(card_loc=0;card_loc<N_CARDSET*N_CARD;card_loc++){
+		
+	for(card_loc=0; card_loc < N_CARDSET*N_CARD; card_loc++){
 		rand_loc = rand() % (N_CARDSET*N_CARD);
 		
 		//Before chage
@@ -105,10 +107,13 @@ int pullCard(void) {
 
 //player settiing
 int configUser(void) {
+	
 	do{
 		printf("input the number of players(Max:5) :" );
 		
 		scanf("%d", &n_user);
+		while(getchar() != '\n');								//https://hashcode.co.kr/questions/2958/c%EC%96%B8%EC%96%B4-%EC%A0%95%EC%88%98-%EC%9E%85%EB%A0%A5-scanf%EC%97%90%EC%84%9C-%EB%AC%B8%EC%9E%90%EC%97%B4-%EC%9E%85%EB%A0%A5-%EC%8B%9C-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC
+		//can't put word. Just number
 		
 		if(n_user <= 5 && n_user >= 1){
 			
@@ -117,7 +122,7 @@ int configUser(void) {
 			printf("Too many players!!!\n");
 		}
 		else{
-			printf("invalid inpur players!\n");
+			printf("invalid input players!\n");
 		}
 	}while(n_user > 5 || n_user < 1);
 	
@@ -130,15 +135,18 @@ int betDollar(void) {
 	int i;
 	
 	roundNo = roundNo + 1;
+	
 	printf("\n------------------------------------------------------\n");
 	printf("-------ROUND %d  (Card Index : %d)-------", roundNo, cardIndex);
 	printf("\n------------------------------------------------------\n");
 	
-	printf(" ------- BETTING STEP ------- \n");
 	do{
+		printf(" ------- BETTING STEP ------- \n");
 		printf("  -> your betting (total : $%d) : $", dollar[1]);
 		scanf("%d", &getBetting);
-		
+		while(getchar() != '\n');								//https://hashcode.co.kr/questions/2958/c%EC%96%B8%EC%96%B4-%EC%A0%95%EC%88%98-%EC%9E%85%EB%A0%A5-scanf%EC%97%90%EC%84%9C-%EB%AC%B8%EC%9E%90%EC%97%B4-%EC%9E%85%EB%A0%A5-%EC%8B%9C-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC
+		//can't put word. Just number
+	
 		if(getBetting <= dollar[1] && getBetting >=1){
 			
 		}
@@ -148,14 +156,16 @@ int betDollar(void) {
 		else{
 			printf("  -> invalid input for betting\n");
 		}
-	}while(getBetting > dollar[1] || getBetting <1);
+	}while(getBetting > dollar[1] || getBetting < 1);
 	
 	bet[1] = getBetting;
 	
 	//other players bet money randomly
 	getBetting = 0;
 	for(i=2;i<=n_user;i++){
+		
 		getBetting = rand()%9 + 1;			//other players bet between $1 to $9
+		
 		if(getBetting > dollar[i]){
 			bet[i] = dollar[i];
 		}
@@ -175,6 +185,8 @@ void offerCards(void) {
 	{
 		cardhold[i][0] = pullCard();
 		cardhold[i][1] = pullCard();
+		
+		usercardCount[i] = 1;							//player get 2 cards. from 0
 	}
 	/*													//Server is user0
 	//2. give two card for the operator
@@ -191,7 +203,6 @@ void printCardInitialStatus(void) {
 	char card2[3];
 	int sumcard1;
 	int sumcard2;
-	int user;
 	
 	printf("\n----------- CARD OFFERING ---------------\n");
 	
@@ -199,6 +210,7 @@ void printCardInitialStatus(void) {
 		strcpy( card2, printCard(cardhold[0][1]) );
 		
 		printf("	server	:	%s %s\n", card1, card2);
+		
 	for(i=1;i<n_user;i++){
 		strcpy( card1, printCard(cardhold[i][0]) );
 		strcpy( card2, printCard(cardhold[i][1]) );
@@ -212,29 +224,29 @@ void printCardInitialStatus(void) {
 	}	
 	
 	if(sumcard1 == 1 && sumcard2 == 1){					  							//2card is ace
-		cardSum[user] = 1+11;														//11+11-->overflow. So 1+11
+		cardSum[i] = 1+11;														//11+11-->overflow. So 1+11
 	}
 	else if(sumcard1 == 1 || sumcard2 == 1){
 		if((sumcard1 + sumcard2 + 10) >= 17 && (sumcard1 + sumcard2 + 10) <= 21){	//When the sum of the cards is between 17 and 21, ace is 11
-			cardSum[user] = (sumcard1 + sumcard2 + 10);
+			cardSum[i] = (sumcard1 + sumcard2 + 10);
 		}
 		else if((sumcard1 + sumcard2) > 21){										//when the sum of the cards is over 21, ace is 1
-			cardSum[user] = (sumcard1 + sumcard2);
+			cardSum[i] = (sumcard1 + sumcard2);
 		}
 		else{																		//when the sum of the card is less 17, ace is 11
-			cardSum[user] = (sumcard1 + sumcard2 + 10);
+			cardSum[i] = (sumcard1 + sumcard2 + 10);
 		}
 	}
 }
 
-int getAction(void) {
+int getAction(int user) {
 	char cardPrint[3];
-	int user;
-	int GoorStay;		//Go or Stay
-	int Nextcardhold;
+	int GoorStay = 0;		//Go or Stay
+	int Nextcardhold = 0;
+	int i;
 	
 	if(user == 0){
-		printf("servers turn  :  (sum=%d)", cardSum[user]);
+		printf("server turn  :  (sum=%d)", cardSum[user]);
 	}
 	else if(user == 1){
 		printf("your turn  :  (sum=%d)", cardSum[user]);
@@ -243,46 +255,75 @@ int getAction(void) {
 		printf("player%d turn  :  (sum=%d)", user-1, cardSum[user]);
 	}
 	
+	for(i=0; i <= usercardCount[user]; i++){
+		strcpy(cardPrint, printCard(cardhold[user][i]));
+		printf("%s ", cardPrint);
+	}
+	
 	if(user == 1){
 		printf(" ==> Action? (0 - go, others - stay) : ");
 		scanf("%d", &GoorStay);
+		while(getchar() != '\n')								//https://hashcode.co.kr/questions/2958/c%EC%96%B8%EC%96%B4-%EC%A0%95%EC%88%98-%EC%9E%85%EB%A0%A5-scanf%EC%97%90%EC%84%9C-%EB%AC%B8%EC%9E%90%EC%97%B4-%EC%9E%85%EB%A0%A5-%EC%8B%9C-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC
+		//can't put word. Just number
 		
 		if(GoorStay == 0){												//GO
-			Nextcardhold = usercardCount[user]+1;
+			Nextcardhold = usercardCount[user] + 1;
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
 			if( cardSum[user] == 21){
-				printf("::: Black Jack!congratulation, you win!! --> +$%d ($52)", bet[user]*2, dollar[user]);
+				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user]);
+				for(i=0; i<n_user; i++){
+					strcpy(cardPrint, printCard(cardhold[user][i]));
+					printf("%s ", cardPrint);
+				}
+				return 1;
 			}
 			else if( cardSum[user] > 21){
 				printf("::: DEAD (sum:%d) --> -$%d ($%d)", cardSum[user], bet[user]*2, dollar[user]);
+				for(i=0; i<n_user; i++){
+					strcpy(cardPrint, printCard(cardhold[user][i]));
+					printf("%s ", cardPrint);
+				return 1;
+				}
 			}
 			else{
-				
+				return 0;
 			}
 		}
 		else{															//STAY
-			
+			return 1;
 		}
-	}
+}
 	else{
-		if(cardSum[user] > 17){
+		if(cardSum[user] < 17){
 			printf(" ==> Action? (0 - go, others - stay) : Go\n");	
 			Nextcardhold = usercardCount[user]+1;
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
 			if( cardSum[user] == 21){
 				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user]);
+				for(i=0; i<n_user; i++){
+					strcpy(cardPrint, printCard(cardhold[user][i]));
+					printf("%s ", cardPrint);
+				return 1;
+				}	
 			}
 			else if( cardSum[user] > 21){
 				printf("::: DEAD (sum:%d) --> -$%d ($%d)", cardSum[user], bet[user]*2, dollar[user]);
+				for(i=0; i<n_user; i++){
+					strcpy(cardPrint, printCard(cardhold[user][i]));
+					printf("%s ", cardPrint);
+				return 1;
+				}
 			}
 			else{
-				
+				return 0;
 			}
+			return 0;
 		}
 		else{
 			printf(" ==> Action? (0 - go, others - stay) : Stay\n");
+			return 1;
 		}
 	}
 	
@@ -360,7 +401,34 @@ int checkResult() {
 }
 
 int checkWinner() {
+	int i;
+	int winnerMoney = 0;			//winner's money
 	
+	printf(" -------------------------------------------\n\n -------------------------------------------\n\n -------------------------------------------\n\n -------------------------------------------\n\ngame end!");
+	
+	for(i=1;i<=n_user;i++){
+		if(i == 1){
+			printf("your money :$ %d\n", dollar[i]);
+		}
+		else{
+			printf("player %d money :$d\n", i-1, dollar[i]);
+		}
+	}
+	
+	if(winnerMoney < dollar[i]){
+		winnerMoney = dollar[i];
+	}
+	
+	for(i=1;i<=n_user;i++){
+		if(winnerMoney == dollar[i]){
+			if(i == 1){
+				printf("you win");
+			}
+			else{
+				printf("player %d win", i-1);
+			}
+		}	
+	}
 }
 
 
@@ -369,6 +437,8 @@ int main(int argc, char *argv[]) {
 	int roundIndex = 0;
 	int max_user;
 	int i;
+	int keepround = 0;					//continue round: 0, stop round: 1
+	int userGoorStay = 0;					//0: Go, 1: Stay
 	
 	srand((unsigned)time(NULL));
 	
@@ -396,23 +466,42 @@ int main(int argc, char *argv[]) {
 		printCardInitialStatus();
 		printf("\n------------------ GAME start --------------------------\n");
 		
-		//each player's turn
-		/*for (;;;) //each player
-		{
-			while () //do until the player dies or player says stop
-			{
-				//print current card status printUserCardStatus();
-				//check the card status ::: calcStepResult()
-				//GO? STOP? ::: getAction()
-				//check if the turn ends or not
-			}
-		}
-		*/
-		//result
+		keepround = calcStepResult();
+		
+		if(keepround == 1){														//if two card is black jack
 		checkResult();
+		}
+		
+		//each player's turn
+		else{
+		
+			for (i=1;i<=n_user;i++) 											//each player
+			{
+				userGoorStay = 0;
+				do{ 														    	//do until the player dies or player says stop
+					printUserCardStatus(i, usercardCount[i]);					//print current card status printUserCardStatus();
+					if(cardIndex == (N_CARDSET*N_CARD-1)){						//game end if thers is no card
+						goto Endpoint;
+					}
+					userGoorStay = getAction(i);								//keep round if at least one player says go
+				}while(userGoorStay == 0);
+			}
+			
+			userGoorStay = 0;
+			do{ 														    	//do until the player dies or player says stop
+					printUserCardStatus(0, usercardCount[0]);					//print current card status printUserCardStatus();
+					if(cardIndex == (N_CARDSET*N_CARD-1)){						//game end if thers is no card
+						goto Endpoint;
+					}
+					userGoorStay = getAction(0);								//keep round if at least one player says go
+				}while(userGoorStay == 0);
+			//result
+			checkResult();
+	}
 		gameEnd == 1;
 	} while (gameEnd == 0);
 	
+	Endpoint:
 	checkWinner();
 	
 	
