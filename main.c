@@ -142,7 +142,7 @@ int betDollar(void) {
 	printf("\n------------------------------------------------------\n");
 	
 	do{
-		printf(" ------- BETTING STEP ------- \n");
+		printf("\n ------- BETTING STEP ------- \n");
 		printf("  -> your betting (total : $%d) : $", dollar[1]);
 		scanf("%d", &getBetting);
 		while(getchar() != '\n');								//https://hashcode.co.kr/questions/2958/c%EC%96%B8%EC%96%B4-%EC%A0%95%EC%88%98-%EC%9E%85%EB%A0%A5-scanf%EC%97%90%EC%84%9C-%EB%AC%B8%EC%9E%90%EC%97%B4-%EC%9E%85%EB%A0%A5-%EC%8B%9C-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC
@@ -229,7 +229,7 @@ int SUM(int num1, int num2){
 	int sum;
 		
 	if(num1 == 1 && num1 == 1){					  							//2card is ace
-		sum = 1+11;														//11+11-->overflow. So 1+11
+		sum = 1 + 11;														//11+11-->overflow. So 1+11
 	}
 	else if(num1 == 1 || num2 == 1){
 		if((num1 + num2 + 10) >= 17 && (num1 + num2 + 10) <= 21){	//When the sum of the cards is between 17 and 21, ace is 11
@@ -242,6 +242,9 @@ int SUM(int num1, int num2){
 			sum = (num1 + num2 + 10);
 		}
 	}
+	else{
+		sum = num1 + num2;
+	}
 	return sum;
 }
 
@@ -252,13 +255,13 @@ int getAction(int user) {
 	int i;
 	
 	if(user == 0){
-		printf("server turn  :  (sum=%d)", cardSum[user]);
+		printf("server turn  :  ", cardSum[user]);
 	}
 	else if(user == 1){
-		printf("your turn  :  (sum=%d)", cardSum[user]);
+		printf("your turn  :  ", cardSum[user]);
 	}
 	else{
-		printf("player%d turn  :  (sum=%d)", user-1, cardSum[user]);
+		printf("player%d turn  :  ", user-1, cardSum[user]);
 	}
 	
 	for(i=0; i <= usercardCount[user]; i++){
@@ -277,21 +280,20 @@ int getAction(int user) {
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
 			cardSum[user] = SUM (cardSum[user], getCardNum(cardhold[user][Nextcardhold]));
+
 			if( cardSum[user] == 21){
-				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user]);
-				for(i=0; i<n_user; i++){
-					strcpy(cardPrint, printCard(cardhold[user][i]));
-					printf("%s ", cardPrint);
-				}
+				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user] + bet[user]*2);
+				
 				printf("\n\n");
 				return 1;
 			}
 			else if( cardSum[user] > 21){
-				printf("::: DEAD (sum:%d) --> -$%d ($%d)", cardSum[user], bet[user]*2, dollar[user]);
-				for(i=0; i<n_user; i++){
-					strcpy(cardPrint, printCard(cardhold[user][i]));
-					printf("%s ", cardPrint);
-				}
+				for(i=0;i<=usercardCount[user];i++){
+						strcpy(cardPrint, printCard(cardhold[user][i]));
+						printf("%s ", cardPrint);
+					}
+				printf("::: DEAD (sum:%d) --> -$%d ($%d)", cardSum[user], bet[user], dollar[user] - bet[user]);
+				
 				printf("\n\n");
 				return 1;
 			}
@@ -303,35 +305,37 @@ int getAction(int user) {
 			printf("\n\n");
 			return 1;
 		}
-}
+	}
 	else{
 		if(cardSum[user] < 17){
-			printf(" ==> Action? (0 - go, others - stay) : Go\n\n");	
+			printf(" ==> Action? (0 - go, others - stay) : Go\n");	
 			Nextcardhold = usercardCount[user]+1;
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
 			cardSum[user] = SUM (cardSum[user], getCardNum(cardhold[user][Nextcardhold]));
-			
+						
 			if( cardSum[user] == 21){
-				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)\n", bet[user]*2, dollar[user]);
-				for(i=0; i<n_user; i++){
-					strcpy(cardPrint, printCard(cardhold[user][i]));
-					printf("%s ", cardPrint);
-				}	
+				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)\n", bet[user]*2, dollar[user] + bet[user]*2);
+					
 				printf("\n\n");
 				return 1;
 			}
 			else if( cardSum[user] > 21){
 				if(user == 0){
-					printf("::: DEAD (sum:%d)", cardSum[user]);
+					for(i=0;i<=usercardCount[user];i++){
+						strcpy(cardPrint, printCard(cardhold[user][i]));
+						printf("%s ", cardPrint);
+					}
+					printf("::: server DEAD (sum:%d)", cardSum[user]);
 				}
 				else{
-					printf("::: DEAD (sum:%d) --> -$%d ($%d)\n", cardSum[user], bet[user]*2, dollar[user]);
+					for(i=0;i<=usercardCount[user];i++){
+						strcpy(cardPrint, printCard(cardhold[user][i]));
+						printf("%s ", cardPrint);
+					}
+					printf("::: DEAD (sum:%d) --> -$%d ($%d)\n", cardSum[user], bet[user], dollar[user] - bet[user]);
 				}
-				for(i=0; i<n_user; i++){
-					strcpy(cardPrint, printCard(cardhold[user][i]));
-					printf("%s ", cardPrint);
-				}
+				
 				printf("\n\n");
 				return 1;
 			}
@@ -341,7 +345,7 @@ int getAction(int user) {
 			return 0;
 		}
 		else{
-			printf(" ==> Action? (0 - go, others - stay) : Stay\n\n");
+			printf(" ==> Action? (0 - go, others - stay) : Stay\n\n\n");
 			return 1;
 		}
 	}
