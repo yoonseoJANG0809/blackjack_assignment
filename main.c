@@ -208,7 +208,8 @@ void printCardInitialStatus(void) {
 		strcpy( card1, printCard(cardhold[0][0]) );
 		strcpy( card2, printCard(cardhold[0][1]) );
 		
-		printf("	server	:	%s %s\n", card1, card2);
+		//printf("	server	:	%s %s\n", card1, card2);
+		printf("	server	:	XX %s\n", card2);
 		
 	for(i=1;i<n_user;i++){
 		strcpy( card1, printCard(cardhold[i][0]) );
@@ -275,12 +276,14 @@ int getAction(int user) {
 			Nextcardhold = usercardCount[user] + 1;
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
+			cardSum[user] = SUM (cardSum[user], getCardNum(cardhold[user][Nextcardhold]));
 			if( cardSum[user] == 21){
 				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user]);
 				for(i=0; i<n_user; i++){
 					strcpy(cardPrint, printCard(cardhold[user][i]));
 					printf("%s ", cardPrint);
 				}
+				printf("\n\n");
 				return 1;
 			}
 			else if( cardSum[user] > 21){
@@ -288,38 +291,49 @@ int getAction(int user) {
 				for(i=0; i<n_user; i++){
 					strcpy(cardPrint, printCard(cardhold[user][i]));
 					printf("%s ", cardPrint);
-				return 1;
 				}
+				printf("\n\n");
+				return 1;
 			}
 			else{
 				return 0;
 			}
 		}
 		else{															//STAY
+			printf("\n\n");
 			return 1;
 		}
 }
 	else{
 		if(cardSum[user] < 17){
-			printf(" ==> Action? (0 - go, others - stay) : Go\n");	
+			printf(" ==> Action? (0 - go, others - stay) : Go\n\n");	
 			Nextcardhold = usercardCount[user]+1;
 			cardhold[user][Nextcardhold] = pullCard();
 			usercardCount[user] = Nextcardhold;
+			cardSum[user] = SUM (cardSum[user], getCardNum(cardhold[user][Nextcardhold]));
+			
 			if( cardSum[user] == 21){
-				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)", bet[user]*2, dollar[user]);
+				printf("::: Black Jack!congratulation, you win!! --> +$%d ($%d)\n", bet[user]*2, dollar[user]);
 				for(i=0; i<n_user; i++){
 					strcpy(cardPrint, printCard(cardhold[user][i]));
 					printf("%s ", cardPrint);
-				return 1;
 				}	
+				printf("\n\n");
+				return 1;
 			}
 			else if( cardSum[user] > 21){
-				printf("::: DEAD (sum:%d) --> -$%d ($%d)", cardSum[user], bet[user]*2, dollar[user]);
+				if(user == 0){
+					printf("::: DEAD (sum:%d)", cardSum[user]);
+				}
+				else{
+					printf("::: DEAD (sum:%d) --> -$%d ($%d)\n", cardSum[user], bet[user]*2, dollar[user]);
+				}
 				for(i=0; i<n_user; i++){
 					strcpy(cardPrint, printCard(cardhold[user][i]));
 					printf("%s ", cardPrint);
-				return 1;
 				}
+				printf("\n\n");
+				return 1;
 			}
 			else{
 				return 0;
@@ -327,7 +341,7 @@ int getAction(int user) {
 			return 0;
 		}
 		else{
-			printf(" ==> Action? (0 - go, others - stay) : Stay\n");
+			printf(" ==> Action? (0 - go, others - stay) : Stay\n\n");
 			return 1;
 		}
 	}
@@ -506,13 +520,13 @@ int main(int argc, char *argv[]) {
 			//result
 			checkResult();
 	}
-		for(i=0; i <= n_user; i++){
+		for(i=1; i <= n_user; i++){												//no moneu_players
 			if(dollar[i] == 0){
 				gameEnd = 1;
 			}
 		}
 		
-		if((N_CARDSET*N_CARD-cardIndex) < ((n_user+1)*2)){
+		if((N_CARDSET*N_CARD-cardIndex) < ((n_user+1)*2)){						//no card
 			gameEnd = 1;
 		}
 	} while (gameEnd == 0);
