@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define N_CARDSET			1
 #define N_CARD				52
@@ -33,7 +34,7 @@ int bet[N_MAX_USER+1];						//current betting
 int gameEnd = 0; 							//game end flag . No money or No card 
 char cardsuit[3];							// return cardshape that apply to cardnum. shape and number occupy max 3 places
 int roundNo = 0;							//show which round is it
-int usercardCount[N_MAX_USER+1];
+int usercardCount[N_MAX_USER+1];			//how maony card player get
 
 
 //card processing functions ---------------
@@ -201,8 +202,6 @@ void printCardInitialStatus(void) {
 	int i;
 	char card1[3];
 	char card2[3];
-	int sumcard1;
-	int sumcard2;
 	
 	printf("\n----------- CARD OFFERING ---------------\n");
 	
@@ -222,21 +221,27 @@ void printCardInitialStatus(void) {
 			printf("	player%d :	%s %s\n", i-1, card1, card2);
 		}
 	}	
-	
-	if(sumcard1 == 1 && sumcard2 == 1){					  							//2card is ace
-		cardSum[i] = 1+11;														//11+11-->overflow. So 1+11
+
+}
+
+int SUM(int num1, int num2){
+	int sum;
+		
+	if(num1 == 1 && num1 == 1){					  							//2card is ace
+		sum = 1+11;														//11+11-->overflow. So 1+11
 	}
-	else if(sumcard1 == 1 || sumcard2 == 1){
-		if((sumcard1 + sumcard2 + 10) >= 17 && (sumcard1 + sumcard2 + 10) <= 21){	//When the sum of the cards is between 17 and 21, ace is 11
-			cardSum[i] = (sumcard1 + sumcard2 + 10);
+	else if(num1 == 1 || num2 == 1){
+		if((num1 + num2 + 10) >= 17 && (num1 + num2 + 10) <= 21){	//When the sum of the cards is between 17 and 21, ace is 11
+			sum = (num1 + num2 + 10);
 		}
-		else if((sumcard1 + sumcard2) > 21){										//when the sum of the cards is over 21, ace is 1
-			cardSum[i] = (sumcard1 + sumcard2);
+		else if((num1 + num2) > 21){										//when the sum of the cards is over 21, ace is 1
+			sum = (num1 + num2);
 		}
 		else{																		//when the sum of the card is less 17, ace is 11
-			cardSum[i] = (sumcard1 + sumcard2 + 10);
+			sum = (num1 + num2 + 10);
 		}
 	}
+	return sum;
 }
 
 int getAction(int user) {
@@ -263,7 +268,7 @@ int getAction(int user) {
 	if(user == 1){
 		printf(" ==> Action? (0 - go, others - stay) : ");
 		scanf("%d", &GoorStay);
-		while(getchar() != '\n')								//https://hashcode.co.kr/questions/2958/c%EC%96%B8%EC%96%B4-%EC%A0%95%EC%88%98-%EC%9E%85%EB%A0%A5-scanf%EC%97%90%EC%84%9C-%EB%AC%B8%EC%9E%90%EC%97%B4-%EC%9E%85%EB%A0%A5-%EC%8B%9C-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC
+		while(getchar() != '\n');								//https://hashcode.co.kr/questions/2958/c%EC%96%B8%EC%96%B4-%EC%A0%95%EC%88%98-%EC%9E%85%EB%A0%A5-scanf%EC%97%90%EC%84%9C-%EB%AC%B8%EC%9E%90%EC%97%B4-%EC%9E%85%EB%A0%A5-%EC%8B%9C-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC
 		//can't put word. Just number
 		
 		if(GoorStay == 0){												//GO
@@ -333,10 +338,10 @@ int getAction(int user) {
 void printUserCardStatus(int user, int cardcnt) {
 	int i;
 	
-	printf("   -> card : ");
+	//printf("   -> card : ");
 	for (i=0;i<cardcnt;i++)
 		printCard(cardhold[user][i]);
-	printf("\t ::: ");
+	//printf("\t ::: ");
 }
 
 
@@ -344,23 +349,27 @@ void printUserCardStatus(int user, int cardcnt) {
 
 // calculate the card sum and see if : 1. under 21, 2. over 21, 3. blackjack
 int calcStepResult() {
-	int i;
+	int i = 0;
 	int j;
-	int sumCard;			//sum of all cards
-	int currCard;			//card to add
-	int keepround = 0;		//keep round: 0, stop reound: 1
+	int sumCard = 0;			//sum of all cards
+	int currCard = 0;			//card to add
+	int keepRound = 0;			//keep round: 0, stop reound: 1
 	
 	for(i=0;i<=n_user;i++){
-		for(j=1;j<=usercardCount;j++){
-			currCard = getCardNum( cardhold [i][j] );
-			sumCard = sumCard + currCard;					//add by accumulating the card 
+		sumCard = getCardNum ( cardhold[i][0] );
+		currCard = getCardNum ( cardhold[i][1] );
+		sumCard = SUM (sumCard, currCard);
+				
+		for(j=2;j<=usercardCount[i];j++){
+			currCard = getCardNum ( cardhold [i][j] );
+			sumCard = SUM (sumCard, currCard);					//add by accumulating the card 
 		}
 		cardSum[i] = sumCard;
 		if( cardSum[i] == 21 ){
-			keepround = 1;
+			keepRound = 1;
 		}
 	}
-	return keepround;
+	return keepRound;
 }
 
 int checkResult() {
@@ -411,7 +420,7 @@ int checkWinner() {
 			printf("your money :$ %d\n", dollar[i]);
 		}
 		else{
-			printf("player %d money :$d\n", i-1, dollar[i]);
+			printf("player %d money :$%d\n", i-1, dollar[i]);
 		}
 	}
 	
@@ -437,7 +446,7 @@ int main(int argc, char *argv[]) {
 	int roundIndex = 0;
 	int max_user;
 	int i;
-	int keepround = 0;					//continue round: 0, stop round: 1
+	int keepRound = 0;					//continue round: 0, stop round: 1
 	int userGoorStay = 0;					//0: Go, 1: Stay
 	
 	srand((unsigned)time(NULL));
@@ -466,10 +475,9 @@ int main(int argc, char *argv[]) {
 		printCardInitialStatus();
 		printf("\n------------------ GAME start --------------------------\n");
 		
-		keepround = calcStepResult();
-		
-		if(keepround == 1){														//if two card is black jack
-		checkResult();
+		keepRound = calcStepResult();
+		if(keepRound == 1){														//if two card is black jack
+			checkResult();
 		}
 		
 		//each player's turn
@@ -478,7 +486,7 @@ int main(int argc, char *argv[]) {
 			for (i=1;i<=n_user;i++) 											//each player
 			{
 				userGoorStay = 0;
-				do{ 														    	//do until the player dies or player says stop
+				do{ 														   	//do until the player dies or player says stop
 					printUserCardStatus(i, usercardCount[i]);					//print current card status printUserCardStatus();
 					if(cardIndex == (N_CARDSET*N_CARD-1)){						//game end if thers is no card
 						goto Endpoint;
@@ -498,7 +506,15 @@ int main(int argc, char *argv[]) {
 			//result
 			checkResult();
 	}
-		gameEnd == 1;
+		for(i=0; i <= n_user; i++){
+			if(dollar[i] == 0){
+				gameEnd = 1;
+			}
+		}
+		
+		if((N_CARDSET*N_CARD-cardIndex) < ((n_user+1)*2)){
+			gameEnd = 1;
+		}
 	} while (gameEnd == 0);
 	
 	Endpoint:
